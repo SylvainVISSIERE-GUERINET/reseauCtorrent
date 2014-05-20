@@ -1,4 +1,4 @@
-
+#include "Client.h"
 
 usage(){
   printf("usage : cliecho adresseIP_serveur(x.x.x.x)  numero_port_serveur\n");
@@ -10,7 +10,7 @@ void search(char* motsCles[])  {
 }
 
 
-void publish(char* nomFichier, char* motsCles[], ) {
+void publish(char* nomFichier, char* motsCles[]) {
 
 }
 
