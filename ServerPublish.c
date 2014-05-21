@@ -42,12 +42,13 @@ int main(int argc,char* argv[]) {
 			//le client send un PING et ensuite on commence a causer dans le fils.
 			n=recvfrom(servSocket,(void *) rcvdata,sizeof(rcvdata),0,(struct sockaddr *)&cli_addr,&len);
 			// gaffe "\0" correspond a 2 carac alors que '\0' correspond au carac  de fin de chaine
-			rcvdata[n]='\0';
-			if(strcmp(rcvdata,"PING\0")==0)
+			//rcvdata[n]='\0';
+			printf("%s\n",rcvdata);
+			if(strcmp(rcvdata,"PING")==0)
 			{
 				printf("PING RECU! \n");
 				pid=fork();
-				if (pid<0)  
+				if (pid<0)
 				{
 					perror("servPublish : erreur fork\n");
 					exit(1);
@@ -74,18 +75,18 @@ int main(int argc,char* argv[]) {
 					}
 					strcpy(rcvdataChild,"PING ACK");
 					//Server send "PING ACK"
-					sendto(servSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 					//Client send info
-					/*n=recvfrom(servSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
+					n=recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
 					rcvdataChild[n]='\0';
 					//Server re-send info to user-check
-					sendto(servSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 					//Client send "INFO ACK"
-					n=recvfrom(servSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
+					n=recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
 					rcvdataChild[n]='\0';
 					//Server send PUBLISH ACK
 					strcpy(rcvdataChild, "PUBLISH ACK");
-					sendto(servSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);*/
+					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 
 
 					close(dialogueSocket);

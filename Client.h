@@ -30,4 +30,4 @@
 void search(char*[]);
 
 //fonction permettant l'envoi de la requête publish au serveur
-void publish(char*,char*[]);
+void publish(int, struct sockaddr_in*, char*, socklen_t);
