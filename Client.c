@@ -1,13 +1,33 @@
 #include "Client.h"
 #include "Util.h"
 
-usage(){
+void usage(){
   printf("usage : cliecho adresseIP_serveur(x.x.x.x) \n");
 }
 
 //fonction qui fera la requete afin de récupérer la liste des clients qui possède des fichiers correspondant aux mots clé
-void search(char* motsCles[])  {
+void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, socklen_t len)  {
+	int n;
+	char sendbuf[BUFSIZ];
+	
+	// le ServerSearch est au port 2222
+	serv_addr->sin_port = htons(2222);
 
+	// on ouvre un socket UDP
+	if ((serverSocket = socket(PF_INET, SOCK_DGRAM, 0)) <0) {
+		perror ("erreur socket");
+		exit (1);
+	}
+
+	 strcpy(sendbuf,"PING");
+	 n=sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+
+	 //set_timeout(serverSocket,5);
+	 n=recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
+	 sendbuf[n]='\0';
+	 printf("%s\n",sendbuf);
+
+	
 }
 
 void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, socklen_t len) {

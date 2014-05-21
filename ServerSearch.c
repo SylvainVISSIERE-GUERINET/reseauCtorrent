@@ -1,6 +1,6 @@
-#include "ServerPublish.h"
+#include "ServerSearch.h"
 
-usage()
+void usage()
 {
 	printf("Usage : nombre d'arguments invalide.");
 }
