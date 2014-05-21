@@ -2,12 +2,19 @@
  * INCLUDES
  */
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <stdio.h>
+#include <sys/un.h>
+#include <arpa/inet.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <sys/timeb.h>
+#include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
+#include "Util.h"
 
 /*
  * DEFINITIONS VARIABLES
@@ -18,7 +25,6 @@
  *	PROTOTYPES  FONCTIONS
  */
 
-void usage();
 
 //fonction permettant l'envoi de la requête search au serveur
 void search(char*[]);
