@@ -6,7 +6,7 @@ void usage()
 }
 
 int main(int argc, char* argv[]){
-	int servSocket, pid, dialogueSocket, n;
+	int servSocket, pid, dialogSocket, n;
 	struct sockaddr_in serv_addr, serv_addrChild, cli_addr;
 	char rcvdata[BUFSIZ],rcvdataChild[BUFSIZ];
 	char sendbuff[BUFSIZ];
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
 		if (bind(servSocket,(struct sockaddr *) &serv_addr,sizeof(serv_addr))<0)
 		{
 			printf("ServerSearch : erreur bind");
-			exit(1)
+			exit(1);
 		}
 
 		// tant qu'on ne coupe pas le serveur
@@ -68,9 +68,9 @@ int main(int argc, char* argv[]){
 					// on ferme la socket du serveur
 					close(servSocket);
 					// et on ouvre une socket de dialogue
-					dialogSocket = socket(PF_INT, SOCK_DGRAM,0))
+					dialogSocket = socket(PF_INET, SOCK_DGRAM,0);
 					// si il y a une erreur dans l ouverture de la socket
-					if ((dialogSocket<0)
+					if (dialogSocket<0)
 					{
 						perror("ServerSearch : probleme de creation de socket de dialogue dans le fils.");
 						exit(2);
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
 
 					// on envoie le ACK du PING
 					strcpy(rcvdataChild, "PING ACK");
-					sendto(dialogSocket,(void *) rcvDataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+					sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 
 					// le client envoie un mot clef des fichiers // requete SEARCH
 					n = recvfrom(dialogSocket,(void *) rcvdata, sizeof(rcvdata),0,(struct sockaddr *)&cli_addr, &len);
@@ -99,8 +99,8 @@ int main(int argc, char* argv[]){
 
 					printf("ServerSearch - mot clef recu : %s \n", rcvdata);
 					// rechercher la liste des sources (pairs) disposant des fichiers correspondant au mot clef
-					char nomFichier[BUFSIZ];
-					nomFichier = strcat(rcvdata,'.txt');
+					char * nomFichier;
+					nomFichier = strcat(rcvdata,".txt");
 					// on ouvre le fichier du nom de rcvdata.txt
 					FILE *fichier = NULL;
 					fichier = fopen(nomFichier,"r");
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]){
 					{
 						// on retourne qu'aucun fichier ne correspond à ce mot clef
 						strcpy(rcvdataChild, "Aucun fichier ne correspond a votre mot clef.");
-						sendto(dialogSocket,(void *) rcvDataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+						sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 						// on ferme la socket de dialogue
 						close(dialogSocket);
 						exit(0);
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]){
 							nbLignes = nbLignes +1;
 							// la chaine de caracteres peut alors etre envoyee au client, qui la parsera
 							strcpy(rcvdataChild,dansFichier);
-							sendto(dialogSocket,(void *) rcvDataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+							sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 						}			
 
 						// on attend une reponse du client qui nous retourne le nombre de lignes avant de fermer la socket -> TODO si on a le temps			

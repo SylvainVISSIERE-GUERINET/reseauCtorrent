@@ -9,9 +9,21 @@ void usage(){
 void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, socklen_t len)  {
 	int n;
 	char sendbuf[BUFSIZ];
+	struct hostent *hp;
 	
 	// le ServerSearch est au port 2222
 	serv_addr->sin_port = htons(2222);
+
+
+	hp = (struct hostent *)gethostbyname (servIP);
+
+	if (hp == NULL) {
+		fprintf(stderr, "Client: %s non trouve dans in /etc/hosts ou dans le DNS\n", servIP);
+		exit(1);
+	  }
+
+	memcpy( & serv_addr->sin_addr ,  hp->h_addr,  hp->h_length);
+	printf ("IP address: %s\n", inet_ntoa (serv_addr->sin_addr));
 
 	// on ouvre un socket UDP
 	if ((serverSocket = socket(PF_INET, SOCK_DGRAM, 0)) <0) {
@@ -19,13 +31,14 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 		exit (1);
 	}
 
-	 strcpy(sendbuf,"PING");
-	 n=sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+	// on ping le serveur
+	strcpy(sendbuf,"PING");
+	n=sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
 
-	 //set_timeout(serverSocket,5);
-	 n=recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
-	 sendbuf[n]='\0';
-	 printf("%s\n",sendbuf);
+	
+	n=recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
+	sendbuf[n]='\0';
+	printf("%s\n",sendbuf);
 
 	
 }

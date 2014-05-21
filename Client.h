@@ -27,7 +27,7 @@
 
 
 //fonction permettant l'envoi de la requête search au serveur
-void search(char*[]);
+void search(int, struct sockaddr_in *, char*, socklen_t);
 
 //fonction permettant l'envoi de la requête publish au serveur
 void publish(int, struct sockaddr_in*, char*, socklen_t);
