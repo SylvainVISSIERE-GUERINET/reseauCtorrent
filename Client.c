@@ -45,10 +45,10 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 
 void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, socklen_t len) {
 	  int n;
-	  char sendbuf[BUFSIZ];
+	  char sendbuf[BUFSIZ], ok[BUFSIZ];
 	  struct hostent *hp;  
-	  char* info;
-	  char *nom, *type, *liste, *sha, *ip, *ok;
+	  char info[BUFSIZ];
+	  char nom[BUFSIZ], type[BUFSIZ], liste[BUFSIZ], sha[20], ip[15];
 
 
 	  serv_addr->sin_port = htons(2223);
@@ -76,20 +76,37 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 	 //set_timeout(serverSocket,5);
 	 n=recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
 	 printf("%s\n",sendbuf);
-	 /* TODO: ls pour voir fichier publiable
-	 FILE* fp=popen("ls", "r");
-	 char line[130];
+	 
+	 FILE* fp=popen("ls -f Partage/", "r");
+	 char line[130]; 
 	 while(fgets( line, sizeof(line), fp))  {
 	 	printf("%s\n", line);
-	}*/
+	}
 	 strcpy(ok,"non");
-	 sprintf(info, "%s|%s|%s|%s|%s", nom, type, liste, sha, ip);
-	 strcpy(sendbuf,info);
-	 //compare  aoui du coup si pas egale renvoie pas 0 donc on continue
-	 while(strcmp(ok, "oui")) {
-		 sendto(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+	 //compare a oui du coup si pas egale renvoie pas 0 donc on continue
+	 while( strcmp(ok, "oui") ) {
+	 	 printf("lequel des fichiers ci dessus souhaitez vous publier?\n");
+	 	 scanf("%s",nom);
+	 	 viderBuffer();
+	 	 printf("quel est son type?(txt, png, jpeg, etc)\n");
+	 	 scanf("%s",type);
+	 	 viderBuffer();
+	 	 printf("quel mots cles souhaitez vous associer a ce  fichier?(separe par des ';')\n");
+	 	 scanf("%s",liste);
+	 	 viderBuffer();
+	 	 strcpy(sha,"sha1");
+	 	 printf("j'affecte sha\n");
+	 	 strcpy(ip,"193.50.40.103");
+	 	 printf("j'affecte ip\n");
+		 sprintf(info, "%s|%s|%s|%s|%s", nom, type, liste, sha, ip);
+		 printf("j'affecte info\n");
+		 strcpy(sendbuf,info);
+		 // strcpy(sendbuf,"info");
+	 
+		 sendto(serverSocket, (void *) info, sizeof(info), 0, (struct sockaddr *)serv_addr, len);
+		 printf(" info sendto server");
 		 recvfrom(serverSocket, (void*) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
-		 //si ok->envoie ack sinon renvoie
+		 printf("%s\n", sendbuf);
 		 printf("Es ce que ce sont les bonnes donner?(oui ou non)\n");
 		 scanf("%s",ok);
 		 viderBuffer();
@@ -103,8 +120,8 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 int main (int argc, char *argv[])
 {
 
-  int serverSocket;
-  struct sockaddr_in  serv_addr;
+  int serverSocket, choixAction=-1;
+  struct sockaddr_in  serv_addr, cli_addr;
   int ttl;	
   socklen_t len=sizeof(serv_addr);
   
@@ -114,7 +131,19 @@ int main (int argc, char *argv[])
  if (argc != 2){
 	 usage();
 	 exit(1);
- }
+ }	
+
+ 	 /*
+ 	  * Fixe le port du client pour dialogue, UDP et TCP
+ 	  *
+ 	  memset( (char*) &cli_addr, 0, sizeof(cli_addr) );
+ 	  cli_addr.sin_family = PF_INET;
+ 	  cli_addr.sin_addr.s_addr = inet_addr(INADDR_ANY);
+ 	  /*port fixer par le systeme et donc fixe mais par defaut,
+ 	   *de toute façon pas de pb de savoir lequel c'est, vu que en udp: on s'en moque
+ 	   *et en TCP on verra bien
+ 	   *
+ 	  cli_addr.sin_port=htons(0);*/
 
 	 /* 
 	  * Remplir la structure  serv_addr avec l'adresse du serveur sauf port qui est def par publish ou search
@@ -123,6 +152,27 @@ int main (int argc, char *argv[])
 	  serv_addr.sin_family = PF_INET;
 	  serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
 
-	  publish(serverSocket , &serv_addr, argv[1], len);
+	  while(choixAction<0 || choixAction>3) {
+	  	printf("Que voulez vous faire?\nPublier un fichier(0)\nRecherche un fichier sur le serveur(1)\nTelecharger un fichier(2)\nQuitter(3)\n");
+	  	scanf("%d", &choixAction);
+	  	viderBuffer();
+	  	switch(choixAction) {
+	  		case 0:
+	  			publish(serverSocket , &serv_addr, argv[1], len);
+	  			break;
+	  		case 1:
+	  			//search(serverSocket , &serv_addr, argv[1], len);
+	  			break;
+	  		case 2:
+	  			//TCP
+	  			break;
+	  		case 3:
+	  			exit(0);
+	  			break;
+	  		default:
+	  			printf("Commande invalide\n");
+	  			break;
+	  	}
+	  }
 
 }

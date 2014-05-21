@@ -10,7 +10,7 @@ int main(int argc,char* argv[]) {
 	int servSocket,pid,dialogueSocket,n;
 	struct sockaddr_in serv_addr, serv_addrChild, cli_addr;
 	char rcvdata[BUFSIZ],rcvdataChild[BUFSIZ];
-	char sendbuff[BUFSIZ];
+	char sendbuff[BUFSIZ],info[BUFSIZ];
 	socklen_t len=sizeof(serv_addr);
 
 	//on veut appele client <adresse> <port>
@@ -79,12 +79,17 @@ int main(int argc,char* argv[]) {
 					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 					//Client send info
 					n=recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
-					rcvdataChild[n]='\0';
+					printf("rcvdataChild: %s\n", rcvdataChild);
+					//rcvdataChild[n]='\0';
 					//Server re-send info to user-check
 					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 					//Client send "INFO ACK"
-					n=recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
-					rcvdataChild[n]='\0';
+					recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
+					while(strcmp(rcvdataChild, "INFO ACK")) {
+						strcpy(info,rcvdataChild);
+						recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
+					}
+					printf("info: %s\n", info);
 					//Server send PUBLISH ACK
 					strcpy(rcvdataChild, "PUBLISH ACK");
 					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
