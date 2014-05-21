@@ -10,6 +10,7 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 	int n;
 	char sendbuf[BUFSIZ];
 	struct hostent *hp;
+	char *motClef;
 	
 	// le ServerSearch est au port 2222
 	serv_addr->sin_port = htons(2222);
@@ -31,22 +32,51 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 		exit (1);
 	}
 
-	// on ping le serveur
+	// on ping le serveur PING
 	strcpy(sendbuf,"PING");
 	n=sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
 
-	
+	// on recupere la reponse du serveur ACKPING
 	n=recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
 	sendbuf[n]='\0';
 	printf("%s\n",sendbuf);
 
+	// on va alors envoyer le mot clef de notre fichier
+	// il faut donc demander au client d'entrer le mot clef
+	printf("Veuillez entrer votre mot de passe s'il vous plait.");
+	scanf("%s",motClef);
+	viderBuffer();
+	// on envoie alors le motClef au serveur
+	strcpy(sendbuf,motClef);
+	n=sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+
+	// une fois qu'il a recu notre mot clef, le serveur va nous envoyer les fichiers
+	// on recoit donc le premier :
+	n = recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, &len);
+	sendbuf[n]='\0';
+	printf("%s\n", sendbuf);
+
+	// si il indique qu'aucun ne fichier correspondait a notre mot clef :
+	if (strcmp(sendbuf, "Aucun fichier ne correspond a votre mot clef.\0")==0)
+	{
+		// TODO
+	}
+	// sinon
+	// il risque d'y en avoir plusieurs et il va nous les envoyer dans une boucle while, on va donc les recevoir de la maniere suivante :
+	while(strcmp(sendbuf,"Fin fichier\0")!=0)
+	{
+		n = recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, &len);
+		sendbuf[n]='\0';
+		printf("%s\n", sendbuf);
+	}
 	
+	// on ne close pas le socket
 }
 
 void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, socklen_t len) {
 	  int n;
 	  char sendbuf[BUFSIZ];
-	  struct hostent *hp;  
+	  struct hostent *hp;
 	  char* info;
 	  char *nom, *type, *liste, *sha, *ip, *ok;
 

@@ -94,19 +94,20 @@ int main(int argc, char* argv[]){
 					sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 
 					// le client envoie un mot clef des fichiers // requete SEARCH
-					n = recvfrom(dialogSocket,(void *) rcvdata, sizeof(rcvdata),0,(struct sockaddr *)&cli_addr, &len);
-					//rcvdata[n] = '\0';
+					n = recvfrom(dialogSocket,(void *) rcvdataChild, sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr, &len);
+					//rcvdataChild[n] = '\0';
 
-					printf("ServerSearch - mot clef recu : %s \n", rcvdata);
+					printf("ServerSearch - mot clef recu : %s \n", rcvdataChild);
 					// rechercher la liste des sources (pairs) disposant des fichiers correspondant au mot clef
 					char * nomFichier;
-					nomFichier = strcat(rcvdata,".txt");
-					// on ouvre le fichier du nom de rcvdata.txt
+					nomFichier = strcat(rcvdataChild,".txt");
+					// on ouvre le fichier du nom de rcvdataChild.txt
 					FILE *fichier = NULL;
 					fichier = fopen(nomFichier,"r");
 					// s'il n'existe pas
 					if (fichier == NULL)
 					{
+						printf("Nous n'avons pas trouve le fichier correspondant a ce mot clef.");
 						// on retourne qu'aucun fichier ne correspond à ce mot clef
 						strcpy(rcvdataChild, "Aucun fichier ne correspond a votre mot clef.");
 						sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
@@ -130,7 +131,11 @@ int main(int argc, char* argv[]){
 							// la chaine de caracteres peut alors etre envoyee au client, qui la parsera
 							strcpy(rcvdataChild,dansFichier);
 							sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
-						}			
+						}
+						// a la fin, on indiquera au client que les fichiers ont tous ete envoyes
+						strcpy(rcvdataChild,"Fin fichier");
+						sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+						printf("%d fichiers ont ete envoyes.", nbLignes);
 
 						// on attend une reponse du client qui nous retourne le nombre de lignes avant de fermer la socket -> TODO si on a le temps			
 
