@@ -1,5 +1,5 @@
 #include "Client.h"
-#include "Util.h"
+
 
 void usage(){
   printf("usage : cliecho adresseIP_serveur(x.x.x.x) \n");
@@ -34,6 +34,8 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 	  int n;
 	  char sendbuf[BUFSIZ];
 	  struct hostent *hp;  
+	  char* info;
+	  char *nom, *type, *liste, *sha, *ip, *ok;
 
 
 	  serv_addr->sin_port = htons(2223);
@@ -60,12 +62,32 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 
 	 //set_timeout(serverSocket,5);
 	 n=recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
-	 sendbuf[n]='\0';
 	 printf("%s\n",sendbuf);
+	 /* TODO: ls pour voir fichier publiable
+	 FILE* fp=popen("ls", "r");
+	 char line[130];
+	 while(fgets( line, sizeof(line), fp))  {
+	 	printf("%s\n", line);
+	}*/
+	 strcpy(ok,"non");
+	 sprintf(info, "%s|%s|%s|%s|%s", nom, type, liste, sha, ip);
+	 strcpy(sendbuf,info);
+	 //compare  aoui du coup si pas egale renvoie pas 0 donc on continue
+	 while(strcmp(ok, "oui")) {
+		 sendto(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+		 recvfrom(serverSocket, (void*) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
+		 //si ok->envoie ack sinon renvoie
+		 printf("Es ce que ce sont les bonnes donner?(oui ou non)\n");
+		 scanf("%s",ok);
+		 viderBuffer();
+	 }
+	 strcpy(sendbuf, "INFO ACK");
+	 sendto(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+	 recvfrom(serverSocket, (void*) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
+	 printf("Publication faite\n");
 }
 
 int main (int argc, char *argv[])
-
 {
 
   int serverSocket;
@@ -75,7 +97,7 @@ int main (int argc, char *argv[])
   
 
   /* Verifier le nombre de paramètre en entrée */
-  /* clientUDP <hostname> <numero_port>        */
+  /* clientUDP <hostname> */
  if (argc != 2){
 	 usage();
 	 exit(1);

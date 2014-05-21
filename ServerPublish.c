@@ -43,6 +43,7 @@ int main(int argc,char* argv[]) {
 			n=recvfrom(servSocket,(void *) rcvdata,sizeof(rcvdata),0,(struct sockaddr *)&cli_addr,&len);
 			// gaffe "\0" correspond a 2 carac alors que '\0' correspond au carac  de fin de chaine
 			//rcvdata[n]='\0';
+			//strcat(rcvdata, ".txt");
 			printf("%s\n",rcvdata);
 			if(strcmp(rcvdata,"PING")==0)
 			{
