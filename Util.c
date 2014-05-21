@@ -9,3 +9,10 @@ void set_timeout(int socket, int secondes){
         perror("erreur de définition de timeout");
     }
 }
+
+void viderBuffer() {
+  int c=0;
+  while((c=getchar()!='\n')&&(c!=EOF)) {
+  	;
+  }
+}

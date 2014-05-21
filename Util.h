@@ -13,3 +13,5 @@
 #include <string.h>
 
 void set_timeout(int, int);
+
+void viderBuffer();
