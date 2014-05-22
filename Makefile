@@ -2,13 +2,13 @@
 all: Client ServerSearch ServerPublish
 
 Client: Client.o Util.o
-	gcc -o Client Client.o Util.o
+	gcc -o Client Client.o Util.o -lssl -lcrypto
 
 ServerSearch: ServerSearch.o Util.o
-	gcc -o ServerSearch ServerSearch.o Util.o
+	gcc -o ServerSearch ServerSearch.o Util.o -lssl -lcrypto
 
 ServerPublish: ServerPublish.o Util.o
-	gcc -o ServerPublish ServerPublish.o Util.o
+	gcc -o ServerPublish ServerPublish.o Util.o -lssl -lcrypto
 
 Client.o: Client.c Client.h Util.h
 	gcc -o Client.o -c Client.c
