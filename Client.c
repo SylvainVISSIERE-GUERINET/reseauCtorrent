@@ -89,7 +89,7 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 	  char sendbuf[BUFSIZ], ok[BUFSIZ];
 	  struct hostent *hp;  
 	  char info[BUFSIZ];
-	  char nom[BUFSIZ], type[BUFSIZ], liste[BUFSIZ], sha[20], ip[15];
+	  char nom[BUFSIZ], type[BUFSIZ], liste[BUFSIZ], sha[20], ip[15],nbClef[BUFSIZ];
 
 
 	  serv_addr->sin_port = htons(2223);
@@ -136,16 +136,10 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 	 	 scanf("%s",liste);
 	 	 viderBuffer();
 	 	 strcpy(sha,"sha1");
-	 	 printf("j'affecte sha\n");
-	 	 strcpy(ip,"193.50.40.103");
-	 	 printf("j'affecte ip\n");
-		 sprintf(info, "%s|%s|%s|%s|%s", nom, type, liste, sha, ip);
-		 printf("j'affecte info\n");
+		 sprintf(info, "%s|%s|%s|%s", nom, type, liste, sha);
 		 strcpy(sendbuf,info);
-		 // strcpy(sendbuf,"info");
-	 
-		 sendto(serverSocket, (void *) info, sizeof(info), 0, (struct sockaddr *)serv_addr, len);
-		 printf(" info sendto server");
+		 sendto(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+		 printf(" info sended to server\n");
 		 recvfrom(serverSocket, (void*) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
 		 printf("%s\n", sendbuf);
 		 printf("Es ce que ce sont les bonnes donner?(oui ou non)\n");
@@ -154,6 +148,8 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 	 }
 	 strcpy(sendbuf, "INFO ACK");
 	 sendto(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+	 // server send publish ack
+	 printf("publish ack?\n");
 	 recvfrom(serverSocket, (void*) sendbuf, sizeof(sendbuf), 0, (struct sockaddr  *)serv_addr, &len);
 	 printf("Publication faite\n");
 }
