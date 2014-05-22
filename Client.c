@@ -10,7 +10,7 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 	int n;
 	char sendbuf[BUFSIZ];
 	struct hostent *hp;
-	char *motClef;
+	char motClef[BUFSIZ];
 	
 	// le ServerSearch est au port 2222
 	serv_addr->sin_port = htons(2222);
@@ -43,9 +43,10 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 
 	// on va alors envoyer le mot clef de notre fichier
 	// il faut donc demander au client d'entrer le mot clef
-	printf("Veuillez entrer votre mot de passe s'il vous plait.");
+	printf("Veuillez entrer votre mot clef s'il vous plait.\n");
 	scanf("%s",motClef);
 	viderBuffer();
+	printf("\n");
 	// on envoie alors le motClef au serveur
 	strcpy(sendbuf,motClef);
 	n=sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
@@ -62,13 +63,23 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 		// TODO
 	}
 	// sinon
-	// il risque d'y en avoir plusieurs et il va nous les envoyer dans une boucle while, on va donc les recevoir de la maniere suivante :
-	while(strcmp(sendbuf,"Fin fichier\0")!=0)
+	else
 	{
-		n = recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, &len);
-		sendbuf[n]='\0';
-		printf("%s\n", sendbuf);
+		// il risque d'y en avoir plusieurs et il va nous les envoyer dans une boucle while, on va donc les recevoir de la maniere suivante :
+		while(strcmp(sendbuf,"Fin fichier\0")!=0)
+		{
+			strcpy(sendbuf,"ACKFICHIER\n");
+			n = sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
+
+			n = recvfrom(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, &len);
+			sendbuf[n]='\0';
+			printf("%s\n", sendbuf);
+		}
+
+		strcpy(sendbuf,"ACKFICHIER\n");
+		n = sendto(serverSocket,(void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
 	}
+
 	
 	// on ne close pas le socket
 }
@@ -191,7 +202,7 @@ int main (int argc, char *argv[])
 	  			publish(serverSocket , &serv_addr, argv[1], len);
 	  			break;
 	  		case 1:
-	  			//search(serverSocket , &serv_addr, argv[1], len);
+	  			search(serverSocket , &serv_addr, argv[1], len);
 	  			break;
 	  		case 2:
 	  			//TCP
