@@ -17,9 +17,9 @@ void set_timeout(int, int);
 
 void viderBuffer();
 
-<<<<<<< HEAD
 char *toSha1(char *);
-=======
+
+
 
 /**
  * Découpe une chaîne de caractères en plusieurs sous chaînes d'après le caractère délimiteur.
@@ -30,4 +30,3 @@ char *toSha1(char *);
  * @return un pointeur vers les défférents éléments de la chaîne, NULL si une affectation mémoire a râté
  **/
 char** com_split(char*, char , int* );
->>>>>>> bbea00a8a69648e9a2fec9869146f597d94b6cca
