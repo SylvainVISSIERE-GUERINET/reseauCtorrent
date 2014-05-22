@@ -7,17 +7,27 @@ usage(){
 
 int main(int argc,char* argv[]) {
 
-	int servSocket,pid,dialogueSocket,n;
+	int servSocket,pid,dialogueSocket,n,nbClef;
 	struct sockaddr_in serv_addr, serv_addrChild, cli_addr;
 	char rcvdata[BUFSIZ],rcvdataChild[BUFSIZ];
-	char sendbuff[BUFSIZ],info[BUFSIZ];
+	char sendbuff[BUFSIZ],info[BUFSIZ], infoAsplit[BUFSIZ];
+	char nom[BUFSIZ], type[BUFSIZ], liste[BUFSIZ], sha[BUFSIZ], ip[BUFSIZ],path[BUFSIZ],cliIP[15];
+	char* test[5];
+	char* error, *saveptr,token;
+	char** tablMotsClefs;
 	socklen_t len=sizeof(serv_addr);
+	FILE* fd;
 
 	//on veut appele client <adresse> <port>
 	if (argc != 1){
 		usage();
 		exit(1);
 	} else {
+
+		if(opendir("data") == NULL) {
+    		system("mkdir data");
+    	} 
+
 		if ((servSocket = socket(PF_INET, SOCK_DGRAM, 0)) <0) {
 		   perror("servPublish : Probleme socket serv\n");
 		   exit (2);
@@ -77,23 +87,48 @@ int main(int argc,char* argv[]) {
 					strcpy(rcvdataChild,"PING ACK");
 					//Server send "PING ACK"
 					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
-					//Client send info
-					n=recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
-					printf("rcvdataChild: %s\n", rcvdataChild);
-					//rcvdataChild[n]='\0';
-					//Server re-send info to user-check
-					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
-					//Client send "INFO ACK"
-					recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
+					//Client send nbClef
+					
 					while(strcmp(rcvdataChild, "INFO ACK")) {
-						strcpy(info,rcvdataChild);
+						//Client send info
+						n=recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
+						printf("rcvdataChild: %s\n", rcvdataChild);
+						strcpy(info, rcvdataChild);
+						strcpy(cliIP,inet_ntoa(cli_addr.sin_addr));
+						printf("%s\n",cliIP);
+						strcat(info,"|");
+						strcat(info, cliIP);
+						//Server re-send info to user-check
+						sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+						//Client send "INFO ACK"
 						recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);
 					}
 					printf("info: %s\n", info);
+					//sscanf(info, "%s|%s|%s|%s|%s", nom, type, liste, sha, ip);
+					strcpy(infoAsplit,info);
+					strcpy(nom,strtok(info,"|"));
+					strcpy(type,strtok(NULL, "|"));
+					strcpy(liste,strtok(NULL, "|"));
+					strcpy(sha,strtok(NULL, "|"));
+					strcpy(ip,strtok(NULL, "|"));
+
+					tablMotsClefs=com_split(liste, ';', &nbClef);
+					int j;
+					for(j=0;j<nbClef;j++){
+						sprintf(path, "data/%s.txt", tablMotsClefs[j]);
+						if ((fd=fopen(path, "a"))==NULL) {
+							sprintf(error, "ServerPublish : erreur ouverture fichier %s \n", path);
+							perror("ServerPublish : erreur ouverture fichier \n");
+							exit(2);
+						}
+						fprintf(fd, "%s\n",infoAsplit);
+						fclose(fd);
+					}
+
 					//Server send PUBLISH ACK
 					strcpy(rcvdataChild, "PUBLISH ACK");
 					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
-
+					printf("Publish ACK sended\n");
 
 					close(dialogueSocket);
 					exit(0);
