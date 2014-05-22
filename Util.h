@@ -11,7 +11,10 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
+#include <openssl/sha.h>
 
 void set_timeout(int, int);
 
 void viderBuffer();
+
+char *toSha1(char *);
