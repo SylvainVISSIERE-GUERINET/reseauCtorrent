@@ -99,8 +99,13 @@ int main(int argc, char* argv[]){
 
 					printf("ServerSearch - mot clef recu : %s \n", rcvdataChild);
 					// rechercher la liste des sources (pairs) disposant des fichiers correspondant au mot clef
-					char * nomFichier;
-					nomFichier = strcat(rcvdataChild,".txt");
+					char nomFichier[BUFSIZ];
+					/*strcat(nomFichier,rcvdataChild);
+					strcat(nomFichier,".txt");*/
+					sprintf(nomFichier, "data/%s.txt", rcvdataChild);
+					
+					printf("Nom de fichier à ouvrir : %s\n", nomFichier);
+
 					// on ouvre le fichier du nom de rcvdataChild.txt
 					FILE *fichier = NULL;
 					fichier = fopen(nomFichier,"r");
@@ -122,16 +127,44 @@ int main(int argc, char* argv[]){
 						// on recupere dans le fichier
 						char dansFichier[BUFSIZ];
 						int nbLignes = 0;
+						int timeoutOuNon = -1; // on l'initialise a -1 afin de rentrer dans la boucle
 						// on boucle sur le nombre de fichiers concernes par le mot clef
 						while (fgets(dansFichier, BUFSIZ, fichier)!=NULL)
 						{
-							//fscanf(fichier,"%s",dansFichier);
-							//fgets(dansFichier, BUFSIZ, fichier);
+							timeoutOuNon = -1;
 							nbLignes = nbLignes +1;
-							// la chaine de caracteres peut alors etre envoyee au client, qui la parsera
-							strcpy(rcvdataChild,dansFichier);
-							sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+							// on fait une boucle dans laquelle on envoie le fichier toutes les 5 secondes tant qu'on a pas recu de ACKFICHIER
+							while(timeoutOuNon == -1)
+							{
+								// la chaine de caracteres est envoyee au client, qui la parsera
+								strcpy(rcvdataChild,dansFichier);
+								sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
+								printf("Envoi du fichier%d\n", nbLignes);
+
+								// setTimeOut : uniquement sur les rcvd
+								// si timeout expiré : zappe le rcvd
+								// il faut donc checker apres le rcvd si il a été débloqué par une réception ou par un timeout
+								set_timeout(dialogSocket, 5);
+								// on attend a chaque fois de recevoir un "ACKFICHIER" de la part du client avant de lancer un nouveau fichier
+								timeoutOuNon=recvfrom(dialogSocket,(void *) rcvdata, sizeof(rcvdata),0,(struct sockaddr *)&cli_addr, &len);
+								rcvdata[n] = '\0';
+								
+								if (timeoutOuNon == -1)
+								{
+									printf("ServerSearch : Timeout du fichier%d : %d\n",nbLignes, n);
+								}
+
+								if (strcmp(rcvdata,"ACKFICHIER\n"))
+								{
+									printf("ServerSearch : Erreur dans la reception du ACKFICHIER");
+									exit(2);
+								}
+							}
 						}
+
+						// on ferme le fichier
+						fclose(fichier);
+
 						// a la fin, on indiquera au client que les fichiers ont tous ete envoyes
 						strcpy(rcvdataChild,"Fin fichier");
 						sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
