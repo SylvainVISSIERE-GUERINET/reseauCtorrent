@@ -22,6 +22,10 @@ int main (int argc,char *argv[])
     usage();
     exit(1);}
 
+  DIR* d;
+  if((d =  opendir("Partage")) == NULL) {
+    system("mkdir Partage");
+  } 
 
 /*
  * Ouvrir une socket (a TCP socket)
