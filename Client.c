@@ -60,7 +60,7 @@ void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, sock
 	// si il indique qu'aucun ne fichier correspondait a notre mot clef :
 	if (strcmp(sendbuf, "Aucun fichier ne correspond a votre mot clef.\0")==0)
 	{
-		// TODO
+		// on ne fait rien, on ira directement a la fin
 	}
 	// sinon
 	else

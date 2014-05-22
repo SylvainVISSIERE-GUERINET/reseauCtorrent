@@ -99,8 +99,13 @@ int main(int argc, char* argv[]){
 
 					printf("ServerSearch - mot clef recu : %s \n", rcvdataChild);
 					// rechercher la liste des sources (pairs) disposant des fichiers correspondant au mot clef
-					char * nomFichier;
-					nomFichier = strcat(rcvdataChild,".txt");
+					char nomFichier[BUFSIZ];
+					/*strcat(nomFichier,rcvdataChild);
+					strcat(nomFichier,".txt");*/
+					sprintf(nomFichier, "data/%s.txt", rcvdataChild);
+					
+					printf("Nom de fichier à ouvrir : %s\n", nomFichier);
+
 					// on ouvre le fichier du nom de rcvdataChild.txt
 					FILE *fichier = NULL;
 					fichier = fopen(nomFichier,"r");
@@ -156,6 +161,10 @@ int main(int argc, char* argv[]){
 								}
 							}
 						}
+
+						// on ferme le fichier
+						fclose(fichier);
+
 						// a la fin, on indiquera au client que les fichiers ont tous ete envoyes
 						strcpy(rcvdataChild,"Fin fichier");
 						sendto(dialogSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
