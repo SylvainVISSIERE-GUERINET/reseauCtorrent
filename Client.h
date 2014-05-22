@@ -20,7 +20,9 @@
  * DEFINITIONS VARIABLES
  */
 
-
+#define PORT_CLI_TCP 2277
+#define PORT_SEARCH 2222
+#define PORT_PUBLISH 2223
 /* 
  *	PROTOTYPES  FONCTIONS
  */
@@ -31,3 +33,9 @@ void search(int, struct sockaddr_in *, char*, socklen_t);
 
 //fonction permettant l'envoi de la requête publish au serveur
 void publish(int, struct sockaddr_in*, char*, socklen_t);
+
+//menu pour lancer dl
+void quelFichier();
+
+//fonction permettant le telechargmeent d'un fichier a l'aide de son nom, @ipsource, sha1
+void getFile(char*, char*, char*);

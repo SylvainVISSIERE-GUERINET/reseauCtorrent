@@ -5,6 +5,77 @@ void usage(){
   printf("usage : cliecho adresseIP_serveur(x.x.x.x) \n");
 }
 
+void quelFichier() {
+	char nomFichier[BUFSIZ], servIP[BUFSIZ],sha1[BUFSIZ];
+	printf("Veuillez entrer le nom du fichier a telecharger avec son extension sous la forme nom.extension\n");
+	scanf("%s",nomFichier);
+	printf("Veuillez  entrer l'adresse ip du pair sur lequel vous  souhaitez le télécharger\n");
+	scanf("%s",servIP);
+	printf("Veuillez  entrer le sha1 du fichier choisit\n");
+	scanf("%s",sha1);
+	getFile(nomFichier,servIP,sha1);
+}
+
+void getFile(char * fichier, char* servIP, char* sha1)  {
+	int serverSocket, n;
+	struct sockaddr_in  serv_addr;
+	struct hostent *hp; 
+	char buff[16384],path[BUFSIZ];
+
+
+	/* 
+	 * Remplir la structure  serv_addr avec l'adresse du serveur 
+     */
+  memset ( (char *) &serv_addr,0, sizeof(serv_addr) );
+  serv_addr.sin_family = PF_INET;
+  serv_addr.sin_port = htons(PORT_CLI_TCP);
+  hp = (struct hostent *)gethostbyname (servIP);
+
+	if (hp == NULL) {
+		fprintf(stderr, "Client: %s non trouve dans in /etc/hosts ou dans le DNS\n", servIP);
+		exit(1);
+	  }
+
+	memcpy( & serv_addr.sin_addr ,  hp->h_addr,  hp->h_length);
+  
+   
+  /*
+   * Ouvrir socket (socket STREAM)
+   */
+  if ((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) <0) {
+    perror ("erreur socket");
+    exit (1);
+  }
+
+
+  /*
+   * Connect to the serveur 
+   */
+  if (connect (serverSocket, (struct sockaddr *) &serv_addr, sizeof(serv_addr) ) < 0){
+     perror ("erreur connect");
+    exit (1);
+  }
+
+  strcpy(buff,fichier);
+  send(serverSocket,buff,sizeof(buff),0);
+
+  sprintf(path,"Partage/%s",buff);
+  FILE* fd=fopen(path, "wb+");
+
+  while((n = read(serverSocket,buff, sizeof(buff)))>0){
+  	fwrite(buff, 1, n, fd);
+  }
+
+  if(strcmp(toSha1(fichier),sha1)) {
+  	printf("Le hash du fichier est different, le fichier telecharger est possiblement corrompu\n");
+  }
+
+  printf("Fin Telechargement\n");
+
+  close(fd);
+  close(serverSocket);
+}
+
 //fonction qui fera la requete afin de récupérer la liste des clients qui possède des fichiers correspondant aux mots clé
 void search(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, socklen_t len)  {
 	int n;
@@ -123,10 +194,11 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 	 while(fgets( line, sizeof(line), fp))  {
 	 	printf("%s\n", line);
 	}
+	 pclose(fp);
 	 strcpy(ok,"non");
 	 //compare a oui du coup si pas egale renvoie pas 0 donc on continue
 	 while( strcmp(ok, "oui") ) {
-	 	 printf("lequel des fichiers ci dessus souhaitez vous publier?\n");
+	 	 printf("lequel des fichiers ci dessus souhaitez vous publier(nom complet)?\n");
 	 	 scanf("%s",nom);
 	 	 viderBuffer();
 	 	 printf("quel est son type?(txt, png, jpeg, etc)\n");
@@ -135,7 +207,7 @@ void publish(int serverSocket, struct sockaddr_in * serv_addr, char* servIP, soc
 	 	 printf("quel mots cles souhaitez vous associer a ce  fichier?(separe par des ';')\n");
 	 	 scanf("%s",liste);
 	 	 viderBuffer();
-	 	 strcpy(sha,"sha1");
+	 	 strcpy(sha,toSha1(nom));
 		 sprintf(info, "%s|%s|%s|%s", nom, type, liste, sha);
 		 strcpy(sendbuf,info);
 		 sendto(serverSocket, (void *) sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)serv_addr, len);
@@ -188,9 +260,9 @@ int main (int argc, char *argv[])
 	  memset( (char *) &serv_addr,0, sizeof(serv_addr) );
 	  serv_addr.sin_family = PF_INET;
 	  serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
-
+  for(;;) {
+  	  printf("Que voulez vous faire?\nPublier un fichier(0)\nRecherche un fichier sur le serveur(1)\nTelecharger un fichier(2)\nQuitter(3)\n");
 	  while(choixAction<0 || choixAction>3) {
-	  	printf("Que voulez vous faire?\nPublier un fichier(0)\nRecherche un fichier sur le serveur(1)\nTelecharger un fichier(2)\nQuitter(3)\n");
 	  	scanf("%d", &choixAction);
 	  	viderBuffer();
 	  	switch(choixAction) {
@@ -201,7 +273,7 @@ int main (int argc, char *argv[])
 	  			search(serverSocket , &serv_addr, argv[1], len);
 	  			break;
 	  		case 2:
-	  			//TCP
+	  			quelFichier();
 	  			break;
 	  		case 3:
 	  			exit(0);
@@ -210,6 +282,7 @@ int main (int argc, char *argv[])
 	  			printf("Commande invalide\n");
 	  			break;
 	  	}
-	  }
-
+	}
+	choixAction=-1;
+  }
 }

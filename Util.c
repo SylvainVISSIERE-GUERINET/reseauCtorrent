@@ -22,16 +22,18 @@ char *toSha1(char* nomFichier){ // On ouvre le fichier en mode bianire et on ann
 	FILE* fichier = NULL;
 	char hash[SHA_DIGEST_LENGTH];
 	char buffer[16384];
+	char dossierNomFichier[BUFSIZ];
 	int lengthBuffer = sizeof(buffer);
 	int nbCaractParcourus;
 	//char bonsCaract[2*SHA_DIGEST_LENGTH+1];
 	char *bonsCaract;
 
 	// on ouvre le fichier en binaire (d'ou le "rb")
-	fichier = fopen(nomFichier, "rb");
+	sprintf(dossierNomFichier,"Partage/%s",nomFichier);
+	fichier = fopen(dossierNomFichier, "rb");
 	if(fichier == NULL)
 	{
-		printf("toSha1 : le fichier %s n'a pas été trouvé.", nomFichier);
+		printf("toSha1 : le fichier %s n'a pas été trouvé.", dossierNomFichier);
 		return NULL;
 	}
 

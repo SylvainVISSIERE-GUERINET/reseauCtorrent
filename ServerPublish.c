@@ -23,8 +23,8 @@ int main(int argc,char* argv[]) {
 		usage();
 		exit(1);
 	} else {
-
-		if(opendir("data") == NULL) {
+		DIR* d;
+		if((d =  opendir("data")) == NULL) {
     		system("mkdir data");
     	} 
 
@@ -86,9 +86,11 @@ int main(int argc,char* argv[]) {
 					}
 					strcpy(rcvdataChild,"PING ACK");
 					//Server send "PING ACK"
+					printf("envoi : %s\n",rcvdataChild );
+
 					sendto(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,len);
 					//Client send nbClef
-					
+					printf("envoye : %s\n",rcvdataChild );
 					while(strcmp(rcvdataChild, "INFO ACK")) {
 						//Client send info
 						n=recvfrom(dialogueSocket,(void *) rcvdataChild,sizeof(rcvdataChild),0,(struct sockaddr *)&cli_addr,&len);

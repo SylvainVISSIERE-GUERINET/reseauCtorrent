@@ -20,7 +20,7 @@
  * DEFINITIONS VARIABLES
  */
 
-#define PORT 2277;
+#define PORT 2277
 
 /* 
  *	PROTOTYPES  FONCTIONS
