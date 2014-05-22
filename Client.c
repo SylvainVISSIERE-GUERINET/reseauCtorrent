@@ -60,11 +60,14 @@ void getFile(char * fichier, char* servIP, char* sha1)  {
   send(serverSocket,buff,sizeof(buff),0);
 
   sprintf(path,"Partage/%s",buff);
-  FILE* fd=fopen(path, "wb+");
+  FILE* fd=fopen(path, "w+");
 
   while((n = read(serverSocket,buff, sizeof(buff)))>0){
+  	printf("%s\n",buff);
   	fwrite(buff, 1, n, fd);
   }
+
+
 
   if(strcmp(toSha1(fichier),sha1)) {
   	printf("Le hash du fichier est different, le fichier telecharger est possiblement corrompu\n");
@@ -72,7 +75,7 @@ void getFile(char * fichier, char* servIP, char* sha1)  {
 
   printf("Fin Telechargement\n");
 
-  close(fd);
+  fclose(fd);
   close(serverSocket);
 }
 

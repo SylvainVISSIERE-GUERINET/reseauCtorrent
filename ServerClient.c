@@ -85,8 +85,8 @@ if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) <0) {
       //Server Envoie
       int n;
       nbread=fread(rcvbuffer, 1, sizeof(rcvbuffer), fd);
-      printf("%s\n",rcvbuffer);
-      n=write(newsockfd,rcvbuffer,nbread);
+      printf("%d\n",nbread);
+      n=write(newsockfd,rcvbuffer,BUFSIZ);
       while(nbread>0) {
         printf("coucou \n");
         printf("%s\n",rcvbuffer);

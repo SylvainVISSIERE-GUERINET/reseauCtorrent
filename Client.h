@@ -3,6 +3,7 @@
  */
 
 #include <stdio.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

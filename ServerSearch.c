@@ -21,6 +21,10 @@ int main(int argc, char* argv[]){
 	// si on a le bon nombre d'arguments
 	else
 	{
+		DIR* d;
+		if((d =  opendir("data")) == NULL) {
+    		system("mkdir data");
+    	}
 		if ((servSocket = socket(PF_INET, SOCK_DGRAM, 0))<0)
 		{
 			perror("ServerSearch : probleme de la socket du serveur.\n");
