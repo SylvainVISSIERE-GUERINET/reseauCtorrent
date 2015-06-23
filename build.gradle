@@ -1,0 +1,10 @@
+plugins {
+    id 'pl.allegro.tech.build.axion-release' version '1.2.4'
+}
+
+scmVersion {
+    repository {
+        type = 'git'
+        remote = 'origin'
+    }
+}
