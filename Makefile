@@ -1,32 +1,34 @@
-
+CC = gcc
+LDLIBS = -lssl -lcrypto
+CFLAGS = -O1 -march=native -pipe
 all: Client ServerSearch ServerPublish ServerClient
 
 Client: Client.o Util.o
-	gcc -o Client Client.o Util.o -lssl -lcrypto
+	$(CC) $(LDLIBS) -o Client Client.o Util.o
 
 ServerSearch: ServerSearch.o Util.o
-	gcc -o ServerSearch ServerSearch.o Util.o -lssl -lcrypto
+	$(CC) $(LDLIBS) -o ServerSearch ServerSearch.o Util.o
 
 ServerPublish: ServerPublish.o Util.o
-	gcc -o ServerPublish ServerPublish.o Util.o -lssl -lcrypto
+	$(CC) $(LDLIBS) -o ServerPublish ServerPublish.o Util.o
 
 ServerClient: ServerClient.o Util.o
-	gcc -o ServerClient ServerClient.o Util.o -lssl -lcrypto
+	$(CC) $(LDLIBS) -o ServerClient ServerClient.o Util.o
 
 Client.o: Client.c Client.h Util.h
-	gcc -o Client.o -c Client.c
+	$(CC) $(CFLAGS) -o Client.o -c Client.c
 
 ServerPublish.o: ServerPublish.c ServerPublish.h Util.h
-	gcc -o ServerPublish.o -c ServerPublish.c
+	$(CC) $(CFLAGS) -o ServerPublish.o -c ServerPublish.c
 
 ServerSearch.o: ServerSearch.c ServerSearch.h Util.h
-	gcc -o ServerSearch.o -c ServerSearch.c
+	$(CC) $(CFLAGS) -o ServerSearch.o -c ServerSearch.c
 
 ServerClient.o: ServerClient.c ServerClient.h Util.h
-	gcc -o ServerClient.o -c ServerClient.c
+	$(CC) $(CFLAGS) -o ServerClient.o -c ServerClient.c
 
 Util.o: Util.c Util.h
-	gcc -o Util.o -c Util.c
+	$(CC) $(CFLAGS) -o Util.o -c Util.c
 
 clean:
 	rm -rf *.o
